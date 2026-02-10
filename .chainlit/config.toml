@@ -1,0 +1,11 @@
+[project]
+name = "MCP Patterns Client"
+enable_telemetry = false
+
+[features]
+multi_modal = false
+unsafe_allow_html = false
+
+[UI]
+name = "MCP Patterns"
+default_theme = "light"
