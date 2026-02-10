@@ -18,7 +18,7 @@ def register_tools(mcp: FastMCP) -> None:
         ctx: Context = Context,  # type: ignore[assignment]
     ) -> str:
         """List cached entities, filtered by the caller's entitlements and optional category."""
-        cache_holder = ctx.lifespan_context["cache_holder"]
+        cache_holder = ctx.request_context.lifespan_context["cache_holder"]
         cache: CachedData = cache_holder[0]
 
         token = await extract_bearer_token(ctx)
@@ -48,7 +48,7 @@ def register_tools(mcp: FastMCP) -> None:
         ctx: Context = Context,  # type: ignore[assignment]
     ) -> str:
         """Retrieve a single entity by ID, subject to entitlement checks."""
-        cache_holder = ctx.lifespan_context["cache_holder"]
+        cache_holder = ctx.request_context.lifespan_context["cache_holder"]
         cache: CachedData = cache_holder[0]
 
         entity = cache.entities.get(entity_id)
@@ -78,8 +78,8 @@ def register_tools(mcp: FastMCP) -> None:
         ctx: Context = Context,  # type: ignore[assignment]
     ) -> str:
         """Force a cache refresh (admin only)."""
-        cache_holder = ctx.lifespan_context["cache_holder"]
-        http_client = ctx.lifespan_context["http_client"]
+        cache_holder = ctx.request_context.lifespan_context["cache_holder"]
+        http_client = ctx.request_context.lifespan_context["http_client"]
 
         if http_client is None:
             return "No downstream API configured — cache refresh unavailable."

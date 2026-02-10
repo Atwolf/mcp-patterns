@@ -9,6 +9,7 @@ from typing import Any, ParamSpec, TypeVar
 
 import httpx
 from fastmcp import Context
+from fastmcp.server.dependencies import get_http_request
 
 from server.models import UserEntitlements, UserInfo
 
@@ -54,10 +55,9 @@ async def get_entitlements(token: str) -> UserEntitlements:
 
 
 async def extract_bearer_token(ctx: Context) -> str:
-    # Try to get the token from the HTTP request headers.
-    # FastMCP's get_http_request() provides access to the underlying Starlette request.
+    # Use fastmcp's get_http_request() to access the underlying Starlette request.
     try:
-        request = ctx.get_http_request()
+        request = get_http_request()
         if request is not None:
             auth_header = request.headers.get("authorization", "")
             if auth_header.lower().startswith("bearer "):

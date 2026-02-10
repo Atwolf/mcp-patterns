@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
 import httpx
 from fastmcp import FastMCP
@@ -10,6 +11,7 @@ from server.cache import build_cache, refresh_loop
 from server.models import CachedData
 
 
+@asynccontextmanager
 async def app_lifespan(server: FastMCP):
     base_url = os.environ.get("DOWNSTREAM_API_URL", "")
     ttl = int(os.environ.get("CACHE_TTL_SECONDS", "300"))
