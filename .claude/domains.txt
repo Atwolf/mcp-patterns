@@ -1,0 +1,30 @@
+# Research Reference Domains
+# These domains were consulted during MCP pattern research and are useful
+# for implementation reference.
+
+# MCP SDK and Specification
+github.com/modelcontextprotocol/python-sdk
+modelcontextprotocol.github.io/python-sdk
+modelcontextprotocol.io
+pypi.org/project/mcp
+gofastmcp.com
+
+# MCP SDK Deep Documentation
+deepwiki.com/modelcontextprotocol/python-sdk
+
+# MCP Auth References
+mcp-auth.dev
+auth0.com/blog
+aembit.io/blog
+descope.com/blog
+
+# Python Libraries
+docs.pydantic.dev
+www.python-httpx.org
+pyjwt.readthedocs.io
+docs.authlib.org
+casbin.org
+docs.cedarpolicy.com
+
+# MCP Deployment and Transport
+blog.cloudflare.com
