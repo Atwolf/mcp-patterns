@@ -20,6 +20,12 @@ An MCP server that enforces zero-trust authorization by verifying a user JWT (re
 
 **Key topics**: Token relay, `TokenVerifier`, session-scoped entitlements, component visibility, scope-to-tool mapping, defense in depth, policy engine integration.
 
+### [Pattern 3: FastMCP Logging and Observability](./pattern-3-fastmcp-logging-observability.md)
+
+An MCP server instrumented for structured logging, distributed tracing, and metrics via OpenTelemetry, with Arize Phoenix as the observability backend. Captures tool invocations, cache operations, authorization decisions, and downstream API calls as correlated traces. Supports context propagation across the MCP client-server boundary, evaluation workflows, and configurable verbosity for production vs. development.
+
+**Key topics**: OpenTelemetry tracing, Arize Phoenix, OpenInference semantic conventions, MCP semantic conventions, context propagation via `_meta`, Python logging correlation, cache/auth span instrumentation, metrics histograms, evaluation workflows.
+
 ---
 
 ## Cross-Cutting Concerns
@@ -33,8 +39,11 @@ When combining these patterns, several considerations arise:
 | **Initialization** | Lifespan fetches data from downstream | Token verification resolves user entitlements |
 | **Session state** | Optional (cache is server-scoped) | Required (entitlements stored per session) |
 | **Refresh** | TTL-based background refresh of cached data | JWT expiration governs entitlement staleness |
+| **Observability** | Cache refresh spans and staleness metrics | Auth decision audit spans with user/scope attributes |
 
 **Key question**: If both patterns are combined, should the cache be pre-filtered per user's entitlements (session-scoped cache), or should a server-wide cache be filtered at tool execution time? The latter is more memory-efficient; the former is more secure by default (no risk of leaking unfiltered data through a bug).
+
+**Observability integration**: Pattern 3 provides the tracing and metrics layer for both patterns. Cache operations (Pattern 1) and authorization decisions (Pattern 2) produce OTel spans that are correlated into unified traces viewable in Arize Phoenix.
 
 ---
 
@@ -55,3 +64,6 @@ When combining these patterns, several considerations arise:
 | `PyJWT` / `python-jose` | JWT handling |
 | `authlib` | OAuth 2.0/OIDC support |
 | `casbin` / `cedarpy` | Policy engines for authorization |
+| `opentelemetry-api` / `opentelemetry-sdk` | Distributed tracing and metrics |
+| `arize-phoenix-otel` | Arize Phoenix OTel configuration |
+| `openinference-instrumentation-mcp` | MCP client-server context propagation |

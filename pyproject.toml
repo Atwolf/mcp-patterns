@@ -1,0 +1,62 @@
+[project]
+name = "mcp-patterns"
+version = "0.1.0"
+description = "Reusable, importable patterns for building MCP servers"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0",
+    "httpx>=0.27",
+    "pydantic>=2.0",
+    "opentelemetry-api>=1.20",
+]
+
+[project.optional-dependencies]
+# Full observability stack (Arize Phoenix + OTel SDK + instrumentation)
+observability = [
+    "opentelemetry-sdk>=1.20",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.20",
+    "opentelemetry-exporter-otlp-proto-http>=1.20",
+    "opentelemetry-instrumentation-httpx>=0.44b0",
+    "openinference-semantic-conventions>=0.1",
+    "openinference-instrumentation-mcp>=1.0",
+    "arize-phoenix-otel>=0.14",
+]
+# Arize Phoenix server (for self-hosted local development)
+phoenix = [
+    "arize-phoenix>=12.0",
+]
+# Auth dependencies (Pattern 2)
+auth = [
+    "PyJWT>=2.0",
+    "authlib>=1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "mypy>=1.8",
+    "ruff>=0.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mcp_patterns"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
