@@ -8,7 +8,7 @@ This library targets the `mcp` Python SDK ([modelcontextprotocol/python-sdk](htt
 
 ## Patterns
 
-The library implements two core patterns:
+The library implements three core patterns:
 
 ### Pattern 1: Resource Caching (`pattern-1-resource-caching.md`)
 
@@ -31,6 +31,19 @@ Key implementation points:
 - Tool visibility controlled via `ctx.enable_components()` / `ctx.disable_components()` with tags
 - Invocation-time scope checks (decorator pattern) as the security boundary
 - Data-level filtering within tool logic based on stored entitlements
+
+### Pattern 3: FastMCP Logging and Observability (`pattern-3-fastmcp-logging-observability.md`)
+
+An MCP server instrumented for structured logging, distributed tracing, and metrics via OpenTelemetry, exported to Arize Phoenix for visualization, evals, and alerting. Provides composable decorators and context managers for tracing tool calls, cache operations, and auth decisions.
+
+Key implementation points:
+- `configure_telemetry()` sets up OTel pipeline with Phoenix or any OTLP backend
+- `@traced_tool()` decorator wraps tool handlers with OTel spans and MCP semantic attributes
+- `traced_cache_operation` / `traced_auth_check` context managers for Pattern 1/2 integration
+- `openinference-instrumentation-mcp` for client-server trace context propagation via `_meta`
+- `TraceContextFilter` correlates Python log records with active OTel trace/span IDs
+- `MCPMetrics` dataclass with standard MCP histograms plus custom cache/auth counters
+- Environment-variable driven configuration with `TelemetryConfig` Pydantic model
 
 ## Tech Stack and Conventions
 
@@ -56,6 +69,15 @@ Core dependencies:
 - `mcp` — MCP Python SDK (server framework, resource/tool registration, auth)
 - `httpx` — Async HTTP client
 - `pydantic` — Data validation and serialization
+- `opentelemetry-api` — Distributed tracing API (no-op without SDK configured)
+
+Observability (Pattern 3):
+- `opentelemetry-sdk` — TracerProvider, processors, samplers
+- `opentelemetry-exporter-otlp-proto-grpc` — OTLP gRPC exporter
+- `opentelemetry-instrumentation-httpx` — Auto-instrument httpx calls
+- `arize-phoenix-otel` — Phoenix-aware OTel setup helper
+- `openinference-semantic-conventions` — AI/LLM attribute constants
+- `openinference-instrumentation-mcp` — MCP client-server context propagation
 
 Auth-related (Pattern 2):
 - `PyJWT` or `python-jose` — JWT decoding and verification
@@ -88,12 +110,19 @@ mcp-patterns/
         │   ├── cache.py                 # Cache model, refresh logic
         │   ├── lifespan.py              # Lifespan context manager factory
         │   └── resource.py              # MCP resource view over cache
-        └── auth/                        # Pattern 2
+        ├── auth/                        # Pattern 2
+        │   ├── __init__.py
+        │   ├── verifier.py              # TokenVerifier implementation
+        │   ├── entitlements.py           # Entitlement models and resolution
+        │   ├── scopes.py                # Scope-to-tool mapping, decorators
+        │   └── middleware.py            # Authorization enforcement
+        └── observability/               # Pattern 3
             ├── __init__.py
-            ├── verifier.py              # TokenVerifier implementation
-            ├── entitlements.py           # Entitlement models and resolution
-            ├── scopes.py                # Scope-to-tool mapping, decorators
-            └── middleware.py            # Authorization enforcement
+            ├── config.py                # TelemetryConfig Pydantic model
+            ├── setup.py                 # configure_telemetry() — OTel pipeline setup
+            ├── tracing.py               # Traced decorators and context managers
+            ├── logging.py               # TraceContextFilter, configure_logging()
+            └── metrics.py               # MCPMetrics, create_mcp_metrics()
 ```
 
 ## Design Principles
